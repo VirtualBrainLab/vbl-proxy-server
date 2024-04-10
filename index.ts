@@ -4,9 +4,15 @@ const io = new Server(3000);
 console.log("Server started");
 
 io.on("connection", (socket) => {
-    console.log(`A user connected: ${socket.id}`);
+    // Connection and request ID
+    console.log(`Service connected: ${socket.id}`);
+    socket.emit("get_id", (response: string) => {
+        console.log(response);
+    });
+    
+    
     socket.on("disconnect", () => {
-        console.log(`A user disconnected: ${socket.id}`);
+        console.log(`Service disconnected: ${socket.id}`);
     });
     
     socket.on("poke", (data) => {
