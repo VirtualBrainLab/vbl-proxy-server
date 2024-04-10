@@ -1,20 +1,26 @@
 {
   "name": "vbl-proxy-server",
-  "version": "1.0.0",
   "description": "",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
+  "version": "2.0.0",
+  "module": "index.ts",
+  "type": "module",
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
+  "scripts": {
+    "start": "bun run index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
   "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.17.2",
-    "http": "0.0.1-security",
-    "socket.io": "^4.4.1",
-    "ws": "^8.14.1"
+    "socket.io": "^4.7.5"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.8",
+    "utf-8-validate": "^6.0.3"
   }
 }
