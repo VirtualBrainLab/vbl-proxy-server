@@ -80,6 +80,9 @@ io.on("connection", function (socket) {
   socket.on('ReceiveCameraImg', function(data) {
     emitToSender(socket.id, 'ReceiveCameraImg', data);
   });
+  socket.on('urchin-dock-callback', function(data) {
+    emitToSender(socket.id, 'urchin-dock-callback', data);
+  });
   
   // Receiver events
   socket.on('log', function(data) {
