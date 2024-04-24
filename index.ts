@@ -48,6 +48,7 @@ io.on("connection", (socket) => {
     })
 
     socket.onAny((event, args, callback) => {
+        // TODO: If requester, forward to responder -> return in callback.
         console.log(`Event: ${event}, Args: ${args}`);
         socket.emit("test", "Hello World!", (response: string) => {
             console.log(response);
