@@ -21,24 +21,25 @@ io.on("connection", (socket) => {
     let isRequester: boolean = false;
 
     // Record ID.
-    socket.emit("get_pinpoint_id", (pinpointIdInput: string, isRequesterInput: boolean) => {
-        console.log("Socket: " + socket.id + " is a " + (isRequesterInput ? "Requester" : "Responder") + " in pinpoint link " + pinpointIdInput);
-        pinpointId = pinpointIdInput;
-        isRequester = isRequesterInput;
+    socket.emit("get_pinpoint_id", (response: string) => {
+        let responseJson = JSON.parse(response);
+        pinpointId = responseJson["pinpoint_id"];
+        isRequester = responseJson["is_requester"];
+        console.log(`Socket: ${socket.id} is a ${isRequester ? "Requester" : "Responder"} in pinpoint link ${pinpointId}`);
 
         // Map socket ID to pinpoint ID.
-        socketToPinpointId[socket.id] = pinpointIdInput;
+        socketToPinpointId[socket.id] = pinpointId;
         
         // Add connection if new.
-        if (!(pinpointIdInput in connections)) {
-            connections[pinpointIdInput] = {requesterSid: "", responderSid: ""};
+        if (!(pinpointId in connections)) {
+            connections[pinpointId] = {requesterSid: "", responderSid: ""};
         }
         
         // Set the socket ID to the role type.
-        if (isRequesterInput) {
-            connections[pinpointIdInput].requesterSid = socket.id;
+        if (isRequester) {
+            connections[pinpointId].requesterSid = socket.id;
         } else {
-            connections[pinpointIdInput].responderSid = socket.id;
+            connections[pinpointId].responderSid = socket.id;
         }
     });
 
@@ -53,10 +54,14 @@ io.on("connection", (socket) => {
     })
 
     socket.onAny((event, args, callback) => {
+        // Skip if is get pinpoint ID.
+        if (event === "get_pinpoint_id" || event === "connect") {
+            return;
+        }
         
         // Error out if Socket ID not found.
         if (!(socket.id in socketToPinpointId)) {
-            console.error("Socket ID not found in mapping.");
+            console.error("Socket ID not found in mapping."+socket.id);
             return;
         }
         
@@ -75,11 +80,5 @@ io.on("connection", (socket) => {
         } else if(connections[pinpointId].responderSid === socket.id) {
             console.error("Responder cannot send messages.");
         }
-        
-        console.log(`Event: ${event}, Args: ${args}`);
-        socket.emit("test", "Hello World!", (response: string) => {
-            console.log(response);
-        });
-        callback("Received");
     });
 });
