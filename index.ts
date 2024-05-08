@@ -29,12 +29,12 @@ io.on("connection", (socket) => {
 
         // Map socket ID to pinpoint ID.
         socketToPinpointId[socket.id] = pinpointId;
-        
+
         // Add connection if new.
         if (!(pinpointId in connections)) {
             connections[pinpointId] = {requesterSid: "", responderSid: ""};
         }
-        
+
         // Set the socket ID to the role type.
         if (isRequester) {
             connections[pinpointId].requesterSid = socket.id;
@@ -53,31 +53,40 @@ io.on("connection", (socket) => {
 
     })
 
-    socket.onAny((event, args, callback) => {
+    socket.onAny((event, ...args) => {
+        console.log(`Received event: ${event} with args: ${args}`);
+
+        // Extract callback.
+        let callback = (typeof args[args.length - 1] === "function") ? args.pop() : undefined;
+
         // Skip if is get pinpoint ID.
-        if (event === "get_pinpoint_id" || event === "connect") {
+        if (event === "connect") {
             return;
         }
-        
+
         // Error out if Socket ID not found.
         if (!(socket.id in socketToPinpointId)) {
-            console.error("Socket ID not found in mapping."+socket.id);
+            console.error(`Socket ID ${socket.id} not found in mapping.`);
             return;
         }
-        
+
         let pinpointId = socketToPinpointId[socket.id];
-        
+
         // Error out if pinpoint ID not found.
         if (!(pinpointId in connections)) {
             console.error("Pinpoint ID not found in connections.");
             return;
         }
-        
+
         // If requester, forward to responder.
         if (connections[pinpointId].requesterSid === socket.id) {
             console.log("Forwarding to responder.");
-            io.to(connections[pinpointId].responderSid).emit(event, args, callback);
-        } else if(connections[pinpointId].responderSid === socket.id) {
+            io.to(connections[pinpointId].responderSid).timeout(1000).emit(event, args, (response: any) => {
+                    console.log(`Received response: ${response}`);
+                    callback("1.3.0");
+                }
+            );
+        } else if (connections[pinpointId].responderSid === socket.id) {
             console.error("Responder cannot send messages.");
         }
     });
