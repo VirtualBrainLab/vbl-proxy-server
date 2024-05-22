@@ -81,9 +81,13 @@ io.on("connection", (socket) => {
         // If requester, forward to responder.
         if (connections[pinpointId].requesterSid === socket.id) {
             console.log("Forwarding to responder.");
-            io.to(connections[pinpointId].responderSid).timeout(1000).emit(event, args, (response: any) => {
-                    console.log(`Received response: ${response}`);
-                    callback("1.3.0");
+            io.to(connections[pinpointId].responderSid).timeout(1000).emit(event, args, (err: string, response: string) => {
+                    if (err) {
+                        console.log(`Received error: ${err}`);
+                    } else {
+                        console.log(`Received response: ${response}`);
+                        callback(response);
+                    }
                 }
             );
         } else if (connections[pinpointId].responderSid === socket.id) {
