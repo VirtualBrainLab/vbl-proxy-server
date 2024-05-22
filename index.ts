@@ -74,19 +74,19 @@ io.on("connection", (socket) => {
 
         // Error out if pinpoint ID not found.
         if (!(pinpointId in connections)) {
-            console.error("Pinpoint ID not found in connections.");
+            console.error("Pinpoint ID not found in connections."); 
             return;
         }
 
         // If requester, forward to responder.
         if (connections[pinpointId].requesterSid === socket.id) {
             console.log("Forwarding to responder.");
-            io.to(connections[pinpointId].responderSid).timeout(1000).emit(event, args, (err: string, response: string) => {
+            io.to(connections[pinpointId].responderSid).timeout(1000).emit(event, args, (err: object, response: object) => {
                     if (err) {
                         console.log(`Received error: ${err}`);
                     } else {
                         console.log(`Received response: ${response}`);
-                        callback(response);
+                        callback(response.toString());
                     }
                 }
             );
