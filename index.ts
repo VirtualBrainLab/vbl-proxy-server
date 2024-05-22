@@ -25,7 +25,7 @@ io.on("connection", (socket) => {
 		const responseJson = JSON.parse(response);
 		pinpointId = responseJson.pinpoint_id;
 		isRequester = responseJson.is_requester;
-		console.log(
+		console.info(
 			`Socket: ${socket.id} is a ${
 				isRequester ? "Requester" : "Responder"
 			} in pinpoint link ${pinpointId}`,
@@ -52,21 +52,9 @@ io.on("connection", (socket) => {
 		console.log(`Service disconnected: ${socket.id}`);
 	});
 
-	socket.on("poke", (data) => {
-		console.log(data);
-	});
-
+	// Proxy logic.
 	socket.onAny((event, ...args) => {
-		console.log(`Received event: ${event} with args: ${args}`);
-
-		// Extract callback.
-		const callback =
-			typeof args[args.length - 1] === "function" ? args.pop() : undefined;
-
-		// Skip if is get pinpoint ID.
-		if (event === "connect") {
-			return;
-		}
+		console.log(`Handling event: ${event} with args: ${args}`);
 
 		// Error out if Socket ID not found.
 		if (!(socket.id in socketToPinpointId)) {
@@ -82,16 +70,23 @@ io.on("connection", (socket) => {
 			return;
 		}
 
+		// Extract callback.
+		const callback =
+			typeof args[args.length - 1] === "function" ? args.pop() : undefined;
+
+		// Prepend socket id to args.
+		args.unshift(socket.id);
+
 		// If requester, forward to responder.
 		if (connections[pinpointId].requesterSid === socket.id) {
-			console.log("Forwarding to responder.");
+			console.info("Forwarding to responder.");
 			io.to(connections[pinpointId].responderSid)
 				.timeout(1000)
-				.emit(event, args, (err: object, response: object) => {
+				.emit(event, ...args, (err: object, response: object) => {
 					if (err) {
-						console.log(`Received error: ${err}`);
+						console.error(`Received error: ${err}`);
 					} else {
-						console.log(`Received response: ${response}`);
+						console.info(`Received response: ${response}`);
 						callback(response.toString());
 					}
 				});
