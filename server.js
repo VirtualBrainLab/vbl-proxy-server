@@ -94,6 +94,11 @@ io.on("connection", function (socket) {
   socket.on('log-error', function(data) {
     emitToSender(socket.id, 'log-error', data);
   });
+  
+  // Probe coordinate event (for CSE 512 final project)
+  socket.on('512_probe_coords', function(data) {
+    emitToSender(socket.id, '512_probe_coords', data);
+  });
 
   // For all remaining events, asssume they are a sender -> receiver broadcast and emit them automatically
   socket.onAny((eventName, data) => {
