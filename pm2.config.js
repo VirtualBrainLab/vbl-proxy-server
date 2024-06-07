@@ -1,5 +1,3 @@
-module.exports = {
-  name: "VBL Proxy v2", // Name of your application
-  script: "index.ts", // Entry point of your application
-  interpreter: "~/.bun/bin/bun", // Path to the Bun interpreter
-};
+export const name = 'VBL Proxy v2'
+export const script = 'index.ts'
+export const interpreter = '~/.bun/bin/bun'
