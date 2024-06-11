@@ -12,6 +12,9 @@ type RequesterResponderPair = {
 const connections: { [pinpointId: string]: RequesterResponderPair } = {};
 const socketToPinpointId: { [sid: string]: string } = {};
 
+// Error response shape.
+const errorResponse = (message: string) => `{"error": "${message}"}`;
+
 // Connection handler.
 io.on("connection", (socket) => {
 	console.log(`Service connected: ${socket.id}`);
@@ -58,7 +61,7 @@ io.on("connection", (socket) => {
 
 		// Error out if Socket ID not found.
 		if (!(socket.id in socketToPinpointId)) {
-			console.error(`Socket ID ${socket.id} not found in mapping.`);
+			console.error(`Unregistered connection: Socket ID ${socket.id} not found in mapping.`);
 			return;
 		}
 
@@ -66,24 +69,28 @@ io.on("connection", (socket) => {
 
 		// Error out if pinpoint ID not found.
 		if (!(pinpointId in connections)) {
-			console.error("Pinpoint ID not found in connections.");
+			console.error("Unregistered connection: Pinpoint ID not found in connections.");
 			return;
 		}
 		
+		// Extract callback.
+		const callback =
+			typeof args[args.length - 1] === "function" ? args.pop() : undefined;
+		
+		// Extract requester and responder.
 		const { requesterSid, responderSid } = connections[pinpointId];
 		
 		// Error out if the connection is not complete.
 		if (requesterSid === "") {
-			console.error("Connection incomplete. Missing responder.");
-			return;
+			const errorMessage = "Connection incomplete. Missing requester.";
+			console.error(errorMessage);
+			if(callback) callback(errorResponse(errorMessage));
 		} else if (responderSid === "") {
-			console.error("Connection incomplete. Missing requester.");
+			const errorMessage = "Connection incomplete. Missing responder.";
+			console.error(errorMessage);
+			if(callback) callback(errorResponse(errorMessage));
 			return;
 		}
-
-		// Extract callback.
-		const callback =
-			typeof args[args.length - 1] === "function" ? args.pop() : undefined;
 
 		// Prepend socket id to args.
 		args.unshift(socket.id);
@@ -98,10 +105,10 @@ io.on("connection", (socket) => {
 						console.error(`Received error: ${err}`);
 					} else {
 						console.info(`Received response: ${response}`);
-						callback(response.toString());
+						if (callback) callback(response.toString());
 					}
 				});
-		} else if (connections[pinpointId].responderSid === socket.id) {
+		} else if (responderSid === socket.id) {
 			console.error("Responder cannot send messages.");
 		}
 	});
