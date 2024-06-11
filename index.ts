@@ -69,6 +69,17 @@ io.on("connection", (socket) => {
 			console.error("Pinpoint ID not found in connections.");
 			return;
 		}
+		
+		const { requesterSid, responderSid } = connections[pinpointId];
+		
+		// Error out if the connection is not complete.
+		if (requesterSid === "") {
+			console.error("Connection incomplete. Missing responder.");
+			return;
+		} else if (responderSid === "") {
+			console.error("Connection incomplete. Missing requester.");
+			return;
+		}
 
 		// Extract callback.
 		const callback =
@@ -78,9 +89,9 @@ io.on("connection", (socket) => {
 		args.unshift(socket.id);
 
 		// If requester, forward to responder.
-		if (connections[pinpointId].requesterSid === socket.id) {
+		if (requesterSid === socket.id) {
 			console.info("Forwarding to responder.");
-			io.to(connections[pinpointId].responderSid)
+			io.to(responderSid)
 				.timeout(1000)
 				.emit(event, ...args, (err: object, response: object) => {
 					if (err) {
