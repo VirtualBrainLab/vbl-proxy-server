@@ -80,10 +80,10 @@ io.on("connection", (socket) => {
 		// Error out if the connection is not complete.
 		if (requesterSid === "") {
 			console.error("Connection incomplete. Missing requester.");
-			if(callback) callback();
+			if(callback) callback("");
 		} else if (responderSid === "") {
 			console.error("Connection incomplete. Missing responder.");
-			if(callback) callback();
+			if(callback) callback("");
 			return;
 		}
 
