@@ -12,9 +12,6 @@ type RequesterResponderPair = {
 const connections: { [pinpointId: string]: RequesterResponderPair } = {};
 const socketToPinpointId: { [sid: string]: string } = {};
 
-// Error response shape.
-const errorResponse = (message: string) => `{"error": "${message}"}`;
-
 // Connection handler.
 io.on("connection", (socket) => {
 	console.log(`Service connected: ${socket.id}`);
@@ -82,13 +79,11 @@ io.on("connection", (socket) => {
 		
 		// Error out if the connection is not complete.
 		if (requesterSid === "") {
-			const errorMessage = "Connection incomplete. Missing requester.";
-			console.error(errorMessage);
-			if(callback) callback(errorResponse(errorMessage));
+			console.error("Connection incomplete. Missing requester.");
+			if(callback) callback();
 		} else if (responderSid === "") {
-			const errorMessage = "Connection incomplete. Missing responder.";
-			console.error(errorMessage);
-			if(callback) callback(errorResponse(errorMessage));
+			console.error("Connection incomplete. Missing responder.");
+			if(callback) callback();
 			return;
 		}
 
