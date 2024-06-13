@@ -54,7 +54,7 @@ io.on("connection", (socket) => {
 
 	// Proxy logic.
 	socket.onAny((event, ...args) => {
-		console.log(`Handling event: ${event} with args: ${args}`);
+		// console.log(`Handling event: ${event} with args: ${args}`);
 
 		// Error out if Socket ID not found.
 		if (!(socket.id in socketToPinpointId)) {
@@ -94,7 +94,7 @@ io.on("connection", (socket) => {
 		if (requesterSid === socket.id) {
 			console.info("Forwarding to responder.");
 			io.to(responderSid)
-				.timeout(1000)
+				.timeout(3600000)
 				.emit(event, ...args, (err: object, response: object) => {
 					if (err) {
 						console.error(`Received error: ${err}`);
