@@ -26,7 +26,7 @@ ID2Socket = {}; // keeps track of all sockets with the same ID
 Socket2ID = {}; // keeps track of the ID of each socket
 Socket2Type = {};
 
-reserved_messages = ['connection','disconnect','ID','CameraImgMeta','CameraImg','ReceiveCameraImgMeta','ReceiveCameraImg','log','log-warning','log-error']
+reserved_messages = ['connection','disconnect','ID','CameraImgMeta','CameraImg','ReceiveCameraImgMeta','ReceiveCameraImg','NeuronCallback','log','log-warning','log-error']
 
 io.on("connection", function (socket) {
   console.log("Client connected with ID: " + socket.id);
@@ -85,6 +85,9 @@ io.on("connection", function (socket) {
   });
   socket.on('ReceiveCameraImg', function(data) {
     emitToSender(socket.id, 'ReceiveCameraImg', data);
+  });
+  socket.on('NeuronCallback', function(data) {
+    emitToSender(socket.id, 'NeuronCallback', data);
   });
   socket.on('urchin-dock-callback', function(data) {
     emitToSender(socket.id, 'urchin-dock-callback', data);
