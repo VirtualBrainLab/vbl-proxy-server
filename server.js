@@ -75,13 +75,13 @@ io.on("connection", function (socket) {
   
   // Camera receive events
   socket.on('CameraImgMeta', function(data) {
-    emitToSender(socket.id, 'ReceiveCameraImgMeta', data);
+    emitToSender(socket.id, 'CameraImgMeta', data);
   });
   socket.on('CameraImg', function(data) {
-    emitToSender(socket.id, 'ReceiveCameraImg', data);
+    emitToSender(socket.id, 'CameraImg', data);
   });
-  socket.on('ReceiveCameraImg', function(data) {
-    emitToSender(socket.id, 'ReceiveCameraImg', data);
+  socket.on('ReceiveCameraImgMeta', function(data) {
+    emitToSender(socket.id, 'ReceiveCameraImgMeta', data);
   });
   socket.on('ReceiveCameraImg', function(data) {
     emitToSender(socket.id, 'ReceiveCameraImg', data);
