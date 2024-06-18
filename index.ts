@@ -23,8 +23,8 @@ io.on("connection", (socket) => {
 	// Record ID.
 	socket.emit("get_pinpoint_id", (response: string) => {
 		const responseJson = JSON.parse(response);
-		pinpointId = responseJson.pinpoint_id;
-		isRequester = responseJson.is_requester;
+		pinpointId = responseJson.PinpointId;
+		isRequester = responseJson.IsRequester;
 		console.info(
 			`Socket: ${socket.id} is a ${
 				isRequester ? "Requester" : "Responder"
