@@ -19,7 +19,8 @@ const io = require("socket.io")(server, {
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
     "preflightContinue": false,
     "optionsSuccessStatus": 204
-  } 
+  },
+  maxHttpBufferSize: 100 * 1024 * 1024 // Set the maximum packet size to 2MB
 });
 
 ID2Socket = {}; // keeps track of all sockets with the same ID
