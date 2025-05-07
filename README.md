@@ -1,6 +1,6 @@
 # VirtualBrainLab Proxy Server
 
-This server runs both a Socket.IO (port 5000) and WebSocket (port 5001) server on the same Node.JS application.
+This server runs a Socket.IO connection on port 5000
 
 ## Connect as sender
 
@@ -8,7 +8,7 @@ To connect as a sender send the `ID` message with a list of strings `["your-id-s
 
 ## Connect as receiver
 
-To connect as a sender send the `ID` message with a list of strings `["your-id-string", "receive"]`. Your client will be registered as a sender.
+To connect as a sender send the `ID` message with a list of strings `["your-id-string", "receive"]`. Your client will be registered as a receiver.
 
 ## Messages (Sender -> Receiver)
 
@@ -20,9 +20,13 @@ Some message headers are restricted and will not be forwarded from senders to re
 
 | Message      | Data      | Purpose    |
 |--------------|-----------|------------|
-| ID | [string, string]      | Register a receiver with the server       |
 | log      | string | Send logging data       |
 | log-warning      | string  | Send warning data       |
 | log-error      | string  | Send error data       |
+| CameraImgMeta | ... | custom |
+| CameraImg | ... | custom |
 | ReceiveCameraImgMeta      | ...  | custom       |
 | ReceiveCameraImg      | ...  | custom       |
+| NeuronCallback | ... | custom |
+| urchin-loaded-callback | ... | custom |
+| urchin-dock-callback | ... | custom |

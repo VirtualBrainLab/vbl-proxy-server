@@ -27,8 +27,21 @@ ID2Socket = {}; // keeps track of all sockets with the same ID
 Socket2ID = {}; // keeps track of the ID of each socket
 Socket2Type = {};
 
-reserved_messages = ['connection','disconnect','ID','CameraImgMeta','CameraImg','ReceiveCameraImgMeta',
-'ReceiveCameraImg','NeuronCallback','log','log-warning','log-error','urchin-loaded-callback']
+reserved_messages = [
+  'connection',
+  'disconnect',
+  'ID',
+  'CameraImgMeta',
+  'CameraImg',
+  'ReceiveCameraImgMeta',
+  'ReceiveCameraImg',
+  'NeuronCallback',
+  'log',
+  'log-warning',
+  'log-error',
+  'urchin-loaded-callback',
+  'urchin-dock-callback'
+];
 
 io.on("connection", function (socket) {
   console.log("Client connected with ID: " + socket.id);
@@ -108,11 +121,6 @@ io.on("connection", function (socket) {
   socket.on('log-error', function(data) {
     emitToSender(socket.id, 'log-error', data);
   });
-  
-  // Probe coordinate event (for CSE 512 final project)
-  socket.on('512_probe_coords', function(data) {
-    emitToSender(socket.id, '512_probe_coords', data);
-  });
 
   // For all remaining events, asssume they are a sender -> receiver broadcast and emit them automatically
   socket.onAny((eventName, data) => {
@@ -124,13 +132,13 @@ io.on("connection", function (socket) {
 });
 
 function emitToReceiver(id, event, data) {
-  	console.log('Sender sent event: ' + event + ' emitting to all clients with ID: ' + Socket2ID[id] + " and type receive");
-  	for (var socketID of ID2Socket[Socket2ID[id]]) {
-      if (Socket2Type[socketID]=="receive") {
-        console.log('Emitting to: ' + socketID);
-        io.to(socketID).emit(event,data);
-      }
-  	}
+  console.log('Sender sent event: ' + event + ' emitting to all clients with ID: ' + Socket2ID[id] + " and type receive");
+  for (var socketID of ID2Socket[Socket2ID[id]]) {
+    if (Socket2Type[socketID]=="receive") {
+      console.log('Emitting to: ' + socketID);
+      io.to(socketID).emit(event,data);
+    }
+  }
 }
 
 function emitToSender(id, event, data) {
