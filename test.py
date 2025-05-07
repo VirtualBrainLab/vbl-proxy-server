@@ -3,7 +3,6 @@ import socketio
 import time
 import threading
 import uuid
-import json
 from queue import Queue
 
 
