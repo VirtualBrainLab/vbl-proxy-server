@@ -5,22 +5,86 @@ const cors = require("cors");
 const port = process.env.PORT || 5000
 const app = express();
 
-app.use(cors());
+// Configure CORS for Express (for regular HTTP requests)
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'https://data.virtualbrainlab.org',
+      'https://pinpoint.allenneuraldynamics-test.org',
+      'https://pinpoint.allenneuraldynamics.org'
+    ];
+    
+    // Check if the origin starts with any of our allowed origins
+    const isAllowed = allowedOrigins.some(allowedOrigin => 
+      origin.startsWith(allowedOrigin)
+    );
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
+// Trust proxy (important for AWS load balancer)
+app.set('trust proxy', true);
+
+// Add middleware to log requests for debugging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url} - Origin: ${req.get('Origin')} - IP: ${req.ip}`);
+  next();
+});
+
+// Health check endpoint for load balancer
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
 
 const server = app.listen(port, function () {
   console.log(`Listening on port ${port}`);
+  console.log('Server configured for AWS load balancer with proxy trust enabled');
 });
 
 // Socket setup
 const io = require("socket.io")(server, {
-  cors:
-  {
-    "origin": ["https://data.virtualbrainlab.org", "https://pinpoint.allenneuraldynamics-test.org", "https://pinpoint.allenneuraldynamics.org"],
-    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-    "preflightContinue": false,
-    "optionsSuccessStatus": 204
+  cors: {
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      const allowedOrigins = [
+        'https://data.virtualbrainlab.org',
+        'https://pinpoint.allenneuraldynamics-test.org',
+        'https://pinpoint.allenneuraldynamics.org'
+      ];
+      
+      // Check if the origin starts with any of our allowed origins
+      const isAllowed = allowedOrigins.some(allowedOrigin => 
+        origin.startsWith(allowedOrigin)
+      );
+      
+      if (isAllowed) {
+        console.log('Socket.IO allowing origin:', origin);
+        callback(null, true);
+      } else {
+        console.log('Socket.IO CORS blocked origin:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   },
-  maxHttpBufferSize: 1e8 // Set the maximum packet size to 100MB
+  maxHttpBufferSize: 1e8, // Set the maximum packet size to 100MB
+  allowEIO3: true, // Allow older clients to connect
+  transports: ['websocket', 'polling'] // Explicitly allow both transports
 });
 
 ID2Socket = {}; // keeps track of all sockets with the same ID
