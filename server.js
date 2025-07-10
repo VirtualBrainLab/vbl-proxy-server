@@ -28,6 +28,7 @@ app.get('/health', (req, res) => {
 const server = app.listen(port, function () {
   console.log(`Listening on port ${port}`);
   console.log('Server configured for AWS load balancer with proxy trust enabled');
+  console.log(`Socket.IO will be available at: http://localhost:${port}/socket.io/`);
 });
 
 // Socket setup
@@ -42,6 +43,17 @@ const io = require("socket.io")(server, {
   maxHttpBufferSize: 1e8, // Set the maximum packet size to 100MB
   allowEIO3: true, // Allow older clients to connect
   transports: ['websocket', 'polling'] // Explicitly allow both transports
+});
+
+console.log('Socket.IO server initialized with CORS allowing all origins');
+
+// Add a test endpoint to verify the server is working
+app.get('/test', (req, res) => {
+  res.json({ 
+    message: 'Server is running', 
+    socketIOPath: '/socket.io/',
+    timestamp: new Date().toISOString()
+  });
 });
 
 ID2Socket = {}; // keeps track of all sockets with the same ID
@@ -65,7 +77,7 @@ reserved_messages = [
 ];
 
 io.on("connection", function (socket) {
-  console.log("Client connected with ID: " + socket.id);
+  console.log("Client connected with ID: " + socket.id + " from origin: " + socket.handshake.headers.origin);
 
   socket.on('disconnect', () => {
   	console.log('Client disconnected with ID: ' + socket.id);
