@@ -5,30 +5,9 @@ const cors = require("cors");
 const port = process.env.PORT || 5000
 const app = express();
 
-// Configure CORS for Express (for regular HTTP requests)
+// Configure CORS for Express (for regular HTTP requests) - Allow all origins
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'https://data.virtualbrainlab.org',
-      'https://pinpoint.allenneuraldynamics-test.org',
-      'https://pinpoint.allenneuraldynamics.org'
-    ];
-    
-    // Check if the origin starts with any of our allowed origins
-    const isAllowed = allowedOrigins.some(allowedOrigin => 
-      origin.startsWith(allowedOrigin)
-    );
-    
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: true, // Allow all origins
   credentials: true
 }));
 
@@ -54,29 +33,7 @@ const server = app.listen(port, function () {
 // Socket setup
 const io = require("socket.io")(server, {
   cors: {
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      
-      const allowedOrigins = [
-        'https://data.virtualbrainlab.org',
-        'https://pinpoint.allenneuraldynamics-test.org',
-        'https://pinpoint.allenneuraldynamics.org'
-      ];
-      
-      // Check if the origin starts with any of our allowed origins
-      const isAllowed = allowedOrigins.some(allowedOrigin => 
-        origin.startsWith(allowedOrigin)
-      );
-      
-      if (isAllowed) {
-        console.log('Socket.IO allowing origin:', origin);
-        callback(null, true);
-      } else {
-        console.log('Socket.IO CORS blocked origin:', origin);
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: true, // Allow all origins
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
     credentials: true,
     preflightContinue: false,
